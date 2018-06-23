@@ -177,3 +177,27 @@
 #     movq %rax, %rbx
 #     movq $1,   %rax
 #     int  $0x80
+
+
+# 求一个正整数中二进制表示中1的个数, eg: 13  (1011) 1的个数为3
+#int one_count(int target)
+#{
+#    int count = 0;
+#    for(int i=0; i<32; ++i)
+#    {
+#        if(target & (1<<i))
+#        {
+#           count += 1;
+#        }
+#    }
+#    return count;
+#}
+
+# .global _start
+# _onecount:
+#     subq $8,    %rsp
+#     addq $8,    %rsp
+#     ret
+
+
+
