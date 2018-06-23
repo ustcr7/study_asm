@@ -95,30 +95,30 @@
 #     }
 #     return ret;
 # }
-.global _start
-_factorial:
-    subq $4, %rsp    #栈指针下移4字节
-    movl $1, (%rsp)  #ret初始化为1  #注意不能用movq,因为rsp只移动了4字节
-    jmp .TEST
-.LOOP:
-    movl (%rsp), %eax
-    imulq %rdi, %rax
-    movl %eax, (%rsp)   # ret = ret * v
-    subq  $1,  %rdi     # v  -= 1
-.TEST:
-    cmpq  $1,  %rdi     # 判断 v >= 1
-    jg    .LOOP
-
-    movl (%rsp), %eax  #设置返回值寄存器值为ret
-    addq $4, %rsp
-    ret
-
-_start:
-    movq $6, %rdi
-    call _factorial
-    movq %rax, %rbx
-    movq $1,   %rax
-    int  $0x80
+#.global _start
+#_factorial:
+#    subq $8, %rsp    #栈指针下移4字节
+#    movq $1, (%rsp)  #ret初始化为1  #注意不能用movq,因为rsp只移动了4字节
+#    jmp .TEST
+#.LOOP:
+#    movq (%rsp), %rax
+#    imulq %rdi, %rax
+#    movq %rax, (%rsp)   # ret = ret * v
+#    subq  $1,  %rdi     # v  -= 1
+#.TEST:
+#    cmpq  $1,  %rdi     # 判断 v >= 1
+#    jg    .LOOP
+#
+#    movq (%rsp), %rax  #设置返回值寄存器值为ret
+#    addq $8, %rsp
+#    ret
+#
+#_start:
+#    movq $3, %rdi
+#    call _factorial
+#    movq %rax, %rbx
+#    movq $1,   %rax
+#    int  $0x80
 
 # 疑问:a函数中使用了%rax, 但是调用b函数中%rax被破坏了咋办, 所有的寄存器都存在这样的问题吧,所以必须使用栈上变量?
 # 求一个数的十进制表示,其各位相加之和 eg: f(504) = 5 + 0 + 1 = 9
@@ -132,10 +132,48 @@ _start:
 #     }
 #     return sum;
 # }
+#
+# .global _start
+# _mydiv:
+#     movq $0, %rdx    #有的说法是div指令被除数高16位在dx, 低16位在ax中
+#     movq %rdi, %rax
+#     movq %rsi, %rbx
+#     idivq %rbx
+#     ret
+# _mymod:
+#     movq $0, %rdx
+#     movq %rdi, %rax
+#     movq %rsi, %rbx
+#     idivq %rbx
+#     movq %rdx, %rax
+#     ret
 # 
 # _decimalsum:
-#     movq $0, %rax
+#     subq $16, %rsp
+#     movq $0, (%rsp)      # sum初始化为0
+#     movq %rdi, 8(%rsp)   # 初始化栈上临时变量值为v
+#     movq $0, %rax  #无意义方便调试
+#     jmp .TEST
 # .LOOP:
-
-
-    
+#     movq 8(%rsp), %rdi 
+#     movq $10,      %rsi
+#     call _mymod
+#     addq %rax,    (%rsp)
+#     movq 8(%rsp), %rdi 
+#     movq $10,      %rsi
+#     call _mydiv
+#     movq %rax,    8(%rsp) 
+# .TEST:
+#     cmpq $0,      8(%rsp)
+#     jg .LOOP
+#     
+#     movq (%rsp), %rax
+#     addq $16, %rsp
+#     ret
+# 
+# _start:
+#     movq $51303, %rdi
+#     call _decimalsum
+#     movq %rax, %rbx
+#     movq $1,   %rax
+#     int  $0x80
