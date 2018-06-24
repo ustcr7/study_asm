@@ -104,7 +104,7 @@ _binaryonecount:
 _luckynumbercount:
     subq    $32,        %rsp
     movq    $0,         (%rsp)   # count
-    movq    $0,         8(%rsp)   # i
+    movq    $1,         8(%rsp)   # i
     movq    %rdi,       16(%rsp)  # n
     jmp     .TEST3
 .LOOP3:
@@ -122,7 +122,7 @@ _luckynumbercount:
 .TEST3:
     movq    16(%rsp),   %rcx      #cmp貌似不支持两个内存比较,所以必须放一个到寄存器
     cmp     %rcx,       8(%rsp)    # i < n
-    jl      .LOOP3
+    jle     .LOOP3
 
     movq    (%rsp),     %rax
     addq    $32,        %rsp
