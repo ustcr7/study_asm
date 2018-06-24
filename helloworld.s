@@ -1,3 +1,5 @@
+# as -o helloworld.o helloworld.s
+# ld -o helloworld helloworld.o
 # # print hello world
 # .data                    # 数据段声明
 #         msg : .string "Hello, world!\\n" # 要输出的字符串
@@ -193,11 +195,34 @@
 #    return count;
 #}
 
-# .global _start
-# _onecount:
-#     subq $8,    %rsp
-#     addq $8,    %rsp
-#     ret
+.global _start
+_onecount:
+    subq $16,        %rsp
+    movq $0,         (%rsp)    # count = 0
+    movq $0,         8(%rsp)   # i = 0;
+    jmp  .TEST
+.LOOP:
+    movq $1,         %rax
+    #salq  8(%rsp),    %rax   #FIXME 不知道怎么取i的低8位
+    movq  8(%rsp),   %rcx
+    salq  %cl,     %rax       #1<<i
+    andq  %rdi,       %rax    # target & (1<<i)
+    je   .INCINDEX
+    add  $1,         (%rsp)   # count += 1
 
+.INCINDEX:
+    add  $1,        8(%rsp)   # i += 1
+.TEST:
+    cmp $32,        8(%rsp)
+    jl  .LOOP
 
+    movq (%rsp),      %rax
+    addq $16,        %rsp
+    ret
 
+_start:
+   movq  $11,       %rdi
+   call _onecount
+   movq  %rax,      %rbx
+   movq  $1,        %rax
+   int   $0x80
