@@ -68,18 +68,22 @@
 #     return test(&n, 3, 4);
 # }
 
-# .global _start
-# _start:
-#     subq         $8,        %rsp
-#     movl         $1,        (%rsp)
-#     movl         $2,        4(%rsp)
-#     movq         $0,        %rax
-#     addl         (%rsp),    %eax
-#     addl         4(%rsp),   %eax
-#     movq         %rax,      %rbx
-#     addq         $8,        %rsp
-#     movq         $1,        %rax
-#     int          $0x80
+.global _start
+_test:
+    movl         %esi,      (%rdi)
+    movl         %edx,      4(%rdi)
+    movl         (%rdi),    %eax
+    addl         4(%rdi),   %eax
+    ret
+
+_start:
+    subq         $8,        %rsp
+    leaq         (%rsp),    %rdi
+    movq         $30,        %rsi
+    movq         $40,        %rdx
+    call         _test 
+    movq         %rax,      %rbx
+    addq         $8,        %rsp
+    movq         $1,        %rax
+    int          $0x80
      
-
-
