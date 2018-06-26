@@ -123,16 +123,30 @@
 # 
 #     return root->val; //WCC TODO 调用系统调用printf 打印到终端方便观察
 # }
+# %rsp   表示寄存器的值, 该值存的是内存地址
+# (%rsp) 表示%rsp指示的内存地址存储的值
+.global _start
 _reverselist:
-     subq        $24,        %rsp
+     subq        $24,        %rsp       # rsp寄存器指向的地址向下移动24字节
      movq        $0,         (%rsp)     # pre = NULL
      movq        %rdi,       8(%rsp)    # cur = pHead
      jmp         .TEST
 .LOOP:
-     movq        12(%rsp)    , 16(%rsp)    # tmp = cur->next 
-     movq        (%rsp),      12(%rsp)     # cur->next = pre
-     movq        8(%rsp),       (%rsp)     # pre = cur
-     movq        16(%rsp),      8(%rsp)    # cur = tmp
+     movq        8(%rsp),    %rax
+     movq        8(%rax),    %rcx
+     movq        %rcx,      16(%rsp)    # tmp = cur->next
+
+     leaq        12(%rsp),   %rax          
+     movq        %rax,        16(%rsp)     # tmp = cur->next 
+
+     movq        8(%rsp),     %rax
+     movq        %rsp,      8(%rax)      # cur->next = pre
+
+     movq        8(%rsp),      %rax
+     movq        %rax,         (%rsp)      # pre = cur
+
+     movq        16(%rsp),     %rax
+     movq        %rax,         8(%rsp)     # cur = tmp
 .TEST:
     cmp         $0,         8(%rsp)
     jne         .LOOP
@@ -143,11 +157,13 @@ _reverselist:
 
 _start:
     subq        $44,         %rsp 
-    movq        $10,         %(rsp)    # n1.val = 10
-    movq        $712,        12%(rsp)  # n2.val = 712
-    movq        $55,         55%(rsp)  # n3.val = 55
-    movq        12%(rsp),    4%(rsp)   # n1.next = &n2
-    movq        24(%rsp),    16(%rsp)  # n2.next = &n3
+    movq        $10,         (%rsp)    # n1.val = 10
+    movq        $712,        12(%rsp)  # n2.val = 712
+    movq        $55,         55(%rsp)  # n3.val = 55
+    leaq        12(%rsp),    %rax
+    movq        %rax,        4(%rsp)   # n1.next = &n2
+    leaq        24(%rsp),    %rax
+    movq        %rax,        16(%rsp)  # n2.next = &n3
     movq        $0,          28(%rsp)  # n3.next = NULL
     movq        (%rsp),      %rdi
     call        _reverselist
